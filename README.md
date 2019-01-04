@@ -4,7 +4,9 @@ Link: https://ocw.cs.pub.ro/courses/programare/teme_2018/tema3_2018_ca?fbclid=Iw
 
 ### Install:
 git clone https://github.com/corneliu10/GlacierFight.git
+
 cd GlacierFight
+
 make
 
 ### Am folosit ca structuri CelulaGhetar (dmg, h, idulSpiridus (-1 daca nu se afla nimeni in celula)) si Spiridus (hp, stamina, ...) pentru a reprezenta datele intr-un format favorabil: 

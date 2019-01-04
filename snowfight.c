@@ -22,7 +22,7 @@ union {
     unsigned char bytes[4];
 } Storm;
 
-int R, P, EPx, EPy;
+int R, P, EPx, EPy, players;
 Spiridus sp[NMAX];
 CelulaGhetar gt[NMAX][NMAX];
 
@@ -36,17 +36,17 @@ int comparator(const void *a, const void *b) {
         return 1;
     else if (A->eliminated != B->eliminated)
         return B->eliminated - A->eliminated;
-    else 
+    else
         return strcmp(A->nume, B->nume);
 }
 
-int isInside(int circle_x, int circle_y, int rad, int x, int y) { 
-    if ((x - circle_x) * (x - circle_x) + 
-        (y - circle_y) * (y - circle_y) <= rad * rad) 
-        return 1; 
+int isInside(int circle_x, int circle_y, int rad, int x, int y) {
+    if ((x - circle_x) * (x - circle_x) +
+        (y - circle_y) * (y - circle_y) <= rad * rad)
+        return 1;
     else
-        return 0; 
-} 
+        return 0;
+}
 
 void printSpiridus(Spiridus sp) {
     printf("%s x:%d y:%d hp:%d stamina:%d dmg:%d\n",sp.nume, sp.x, sp.y, sp.hp, sp.stamina, sp.dmg);
@@ -60,6 +60,8 @@ void swap(int *a, int *b) {
 
 int fight(int spIndex1, int spIndex2) {
     int dmg1 = sp[spIndex1].dmg, dmg2 = sp[spIndex2].dmg;
+
+    players--;
     if(sp[spIndex1].stamina < sp[spIndex2].stamina) {
         while(sp[spIndex1].hp > 0 && sp[spIndex2].hp > 0) {
             sp[spIndex1].hp -= dmg2;
@@ -94,6 +96,8 @@ int moveSpiridus(int spIndex, char move) {
         case 'U':
             if(oldX - 1 < 0) {
                 sp[spIndex].hp = 0;
+                players--;
+
                 printf("%s fell of the glacier.\n", sp[spIndex].nume);
                 return spIndex;
             }
@@ -105,6 +109,8 @@ int moveSpiridus(int spIndex, char move) {
 
                 if (!isInside(EPx, EPy, R, sp[spIndex].x, sp[spIndex].y)) {
                     sp[spIndex].hp = 0;
+                    players--;
+
                     printf("%s fell of the glacier.\n", sp[spIndex].nume);
                     return spIndex;
                 }
@@ -118,6 +124,8 @@ int moveSpiridus(int spIndex, char move) {
 
                     return winner;
                 }
+
+                gt[oldX-1][oldY].idSpiridus = spIndex;
             }
             break;
         case 'D':
@@ -128,10 +136,12 @@ int moveSpiridus(int spIndex, char move) {
 
                 if (!isInside(EPx, EPy, R, sp[spIndex].x, sp[spIndex].y)) {
                     sp[spIndex].hp = 0;
+                    players--;
+
                     printf("%s fell of the glacier.\n", sp[spIndex].nume);
                     return spIndex;
                 }
-      
+
                 if (gt[oldX+1][oldY].dmg > sp[spIndex].dmg)
                     swap(&sp[spIndex].dmg, &gt[oldX+1][oldY].dmg);
 
@@ -141,11 +151,15 @@ int moveSpiridus(int spIndex, char move) {
 
                     return winner;
                 }
+
+                gt[oldX+1][oldY].idSpiridus = spIndex;
             }
             break;
         case 'L':
             if(oldY - 1 < 0) {
                 sp[spIndex].hp = 0;
+                players--;
+
                 printf("%s fell of the glacier.\n", sp[spIndex].nume);
                 return spIndex;
             }
@@ -157,6 +171,8 @@ int moveSpiridus(int spIndex, char move) {
 
                 if (!isInside(EPx, EPy, R, sp[spIndex].x, sp[spIndex].y)) {
                     sp[spIndex].hp = 0;
+                    players--;
+
                     printf("%s fell of the glacier.\n", sp[spIndex].nume);
                     return spIndex;
                 }
@@ -170,6 +186,8 @@ int moveSpiridus(int spIndex, char move) {
 
                     return winner;
                 }
+
+                gt[oldX][oldY-1].idSpiridus = spIndex;
             }
             break;
         case 'R':
@@ -180,19 +198,23 @@ int moveSpiridus(int spIndex, char move) {
 
                 if (!isInside(EPx, EPy, R, sp[spIndex].x, sp[spIndex].y)) {
                     sp[spIndex].hp = 0;
+                    players--;
+
                     printf("%s fell of the glacier.\n", sp[spIndex].nume);
                     return spIndex;
                 }
 
                 if (gt[oldX][oldY+1].dmg > sp[spIndex].dmg)
                     swap(&sp[spIndex].dmg, &gt[oldX][oldY+1].dmg);
-  
+
                 if (gt[oldX][oldY+1].idSpiridus >= 0) {
                     int winner = fight(spIndex, gt[oldX][oldY+1].idSpiridus);
                     gt[oldX][oldY+1].idSpiridus = winner;
 
                     return winner;
                 }
+
+                gt[oldX][oldY+1].idSpiridus = spIndex;
             }
             break;
         default:
@@ -204,7 +226,7 @@ int moveSpiridus(int spIndex, char move) {
 
 void snowstorm(int K) {
     Storm.storm = K;
-    
+
     int DMG = Storm.bytes[3];
     int R = Storm.bytes[2];
     int Y = Storm.bytes[1];
@@ -225,6 +247,7 @@ void snowstorm(int K) {
             if (sp[i].hp <= 0) {
                 gt[sp[i].x][sp[i].y].idSpiridus = -1;
                 printf("%s was hit by snowstorm.\n", sp[i].nume);
+                players--;
             }
         }
 }
@@ -238,6 +261,7 @@ void meltdown(int stamina) {
             if (!isInside(EPx, EPy, R, sp[i].x, sp[i].y)) {
                 sp[i].hp = 0;
                 printf("%s got wet because of global warming.\n", sp[i].nume);
+                players--;
             }
         }
 }
@@ -253,7 +277,7 @@ void printScoreboard() {
     for(int i=0; i<P; ++i)
         if(cp[i].hp > 0)
             printf("%s\tDRY\t%d\n", cp[i].nume, cp[i].eliminated);
-        else 
+        else
             printf("%s\tWET\t%d\n", cp[i].nume, cp[i].eliminated);
 }
 
@@ -266,6 +290,8 @@ int main()
 
     scanf("%d%d", &R, &P);
     EPx = EPy = R;
+    players = P;
+
     for(int i=0; i < 2*R+1; ++i)
         for(int j=0; j < 2*R+1; ++j) {
             scanf("%d%d", &gt[i][j].h, &gt[i][j].dmg);
@@ -278,6 +304,7 @@ int main()
         if(!isInside(EPx, EPy, R, sp[i].x, sp[i].y)) {
             printf("%s hase missed the glacier.\n", sp[i].nume);
             sp[i].hp = 0;
+            players--;
             continue;
         }
 
@@ -290,7 +317,7 @@ int main()
     }
 
 
-    while(scanf("%s", cmd) > 0) {
+    while(scanf("%s", cmd) > 0 && players > 1) {
         if (!strcmp(cmd, "MOVE")) {
             int id;
             char moves[100];
@@ -298,11 +325,11 @@ int main()
             scanf("%d %s", &id, moves);
             //printSpiridus(sp[id]);
 
-            for(int i=0; moves[i] && sp[id].hp > 0; ++i) {
+            for(int i=0; moves[i] && sp[id].hp > 0 && players > 1; ++i) {
                 int winner = moveSpiridus(id, moves[i]);
                 if (winner == -1) {
-                    printSpiridus(sp[id]);
-                } else if (winner != id) 
+                    //printSpiridus(sp[id]);
+                } else if (winner != id)
                     break;
             }
         } else if (!strcmp(cmd, "MELTDOWN")) {
@@ -322,6 +349,11 @@ int main()
         //printf("%s\n", cmd);
     }
 
+    for(int i=0; i < P; ++i)
+        if(sp[i].hp > 0) {
+            printf("%s has won.\n", sp[i].nume);
+            break;
+        }
 
     return 0;
 }

@@ -4,7 +4,9 @@
 #include <math.h>
 #include <stdlib.h>
 
-#define NMAX 100
+#define inFile "snowfight.in"
+#define outFile "snowfight.out"
+#define NMAX 500
 
 typedef struct CelulaGhetar {
     int dmg, h;
@@ -14,7 +16,7 @@ typedef struct CelulaGhetar {
 typedef struct {
     int hp, stamina, dmg, eliminated;
     int id, x, y;
-    char nume[25];
+    char nume[50];
 }Spiridus;
 
 union {
@@ -102,7 +104,7 @@ int moveSpiridus(int spIndex, char move) {
                 return spIndex;
             }
 
-            if(abs(gt[oldX-1][oldY].h - gt[oldX][oldY].h) < sp[spIndex].stamina) {
+            if(abs(gt[oldX-1][oldY].h - gt[oldX][oldY].h) <= sp[spIndex].stamina) {
                 gt[oldX][oldY].idSpiridus = -1;
                 sp[spIndex].x--;
                 sp[spIndex].stamina -= abs(gt[oldX-1][oldY].h - gt[oldX][oldY].h);
@@ -129,7 +131,7 @@ int moveSpiridus(int spIndex, char move) {
             }
             break;
         case 'D':
-            if(abs(gt[oldX+1][oldY].h - gt[oldX][oldY].h) < sp[spIndex].stamina) {
+            if(abs(gt[oldX+1][oldY].h - gt[oldX][oldY].h) <= sp[spIndex].stamina) {
                 sp[spIndex].x++;
                 sp[spIndex].stamina -= abs(gt[oldX+1][oldY].h - gt[oldX][oldY].h);
                 gt[oldX][oldY].idSpiridus = -1;
@@ -164,7 +166,7 @@ int moveSpiridus(int spIndex, char move) {
                 return spIndex;
             }
 
-            if(abs(gt[oldX][oldY-1].h - gt[oldX][oldY].h) < sp[spIndex].stamina) {
+            if(abs(gt[oldX][oldY-1].h - gt[oldX][oldY].h) <= sp[spIndex].stamina) {
                 sp[spIndex].y--;
                 sp[spIndex].stamina -= abs(gt[oldX][oldY-1].h - gt[oldX][oldY].h);
                 gt[oldX][oldY].idSpiridus = -1;
@@ -191,7 +193,7 @@ int moveSpiridus(int spIndex, char move) {
             }
             break;
         case 'R':
-            if(abs(gt[oldX][oldY+1].h - gt[oldX][oldY].h) < sp[spIndex].stamina) {
+            if(abs(gt[oldX][oldY+1].h - gt[oldX][oldY].h) <= sp[spIndex].stamina) {
                 sp[spIndex].y++;
                 sp[spIndex].stamina -= abs(gt[oldX][oldY+1].h - gt[oldX][oldY].h);
                 gt[oldX][oldY].idSpiridus = -1;
@@ -283,10 +285,10 @@ void printScoreboard() {
 
 int main()
 {
-    char inFile[100], cmd[100];
+    char cmd[100];
 
-    strcpy(inFile, "snowfight.in");
     freopen(inFile,"r",stdin);
+    freopen(outFile,"w",stdout);
 
     scanf("%d%d", &R, &P);
     EPx = EPy = R;
@@ -302,7 +304,7 @@ int main()
         scanf("%s", sp[i].nume);
         scanf("%d%d%d%d", &sp[i].x, &sp[i].y, &sp[i].hp, &sp[i].stamina);
         if(!isInside(EPx, EPy, R, sp[i].x, sp[i].y)) {
-            printf("%s hase missed the glacier.\n", sp[i].nume);
+            printf("%s has missed the glacier.\n", sp[i].nume);
             sp[i].hp = 0;
             players--;
             continue;
@@ -349,7 +351,7 @@ int main()
         //printf("%s\n", cmd);
     }
 
-    for(int i=0; i < P; ++i)
+    for(int i=0; players == 1 && i < P; ++i)
         if(sp[i].hp > 0) {
             printf("%s has won.\n", sp[i].nume);
             break;

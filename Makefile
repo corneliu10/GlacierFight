@@ -11,7 +11,7 @@ TARGET = snowfight
 
 all: $(TARGET)
 
-$(TARGET): $(TARGET).c
+build: $(TARGET).c
 	$(CC) $(CFLAGS) -o $(TARGET) $(TARGET).c
 
 clean:

@@ -2,7 +2,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
-#include <stdlib.h>
 
 #define inFile "snowfight.in"
 #define outFile "snowfight.out"

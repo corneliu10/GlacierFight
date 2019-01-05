@@ -10,18 +10,18 @@ cd GlacierFight
 make
 
 ### Am folosit ca structuri CelulaGhetar (dmg, h, idulSpiridus (-1 daca nu se afla nimeni in celula)) si Spiridus (hp, stamina, ...) pentru a reprezenta datele intr-un format favorabil: 
+```c
 CelulaGhetar ghetar[NMAX][NMAX];
-
 Spiridus spiridusi[NMAX];
+```
  
 ### Pentru snowstorm am folosit un union pentru a sparge int32 in 4 bytes:
+```c
 union {
-
     unsigned long storm;
-    
     unsigned char bytes[4];
-    
 } Storm;
+```
 
 ### Pentru scoreboard am folosit qsort cu un comparator pe structura Spiridus.
 
